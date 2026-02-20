@@ -14,7 +14,7 @@ This app demonstrates an end-to-end, explainable pipeline on **pediatric lateral
 2. **Custom fine-tuned DPN-68 classifier** predicts whether the cropped lateral lungs are **Normal** or show **TB-related signs**.
 3. **Explainability (CAM family from Jacobgil PyTorch Grad-CAM)** overlays heatmaps and displays the **heatmap-overlaid** lateral CXR.
 
-**Weights are hosted on Hugging Face Hub and downloaded at runtime:**
+**Weights are hosted on Hugging Face Hub and downloaded at runtime**
 
 ---
 
