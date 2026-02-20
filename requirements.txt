@@ -1,0 +1,26 @@
+# ---- App runtime ----
+streamlit>=1.36,<1.49
+numpy --only-binary=numpy
+pillow>=10.2 --only-binary=pillow
+
+# Hugging Face hub + safetensors
+huggingface_hub>=0.23,<0.35 --only-binary=huggingface_hub
+safetensors>=0.4.3 --only-binary=safetensors
+
+# Torch stack (CPU wheels on Streamlit Cloud)
+torch --only-binary=torch
+torchvision --only-binary=torchvision
+timm --only-binary=timm
+pytorch-lightning --only-binary=pytorch-lightning
+
+# PyTorch Grad-CAM (pull from git to avoid any packaging quirks)
+grad-cam @ git+https://github.com/jacobgil/pytorch-grad-cam
+
+# Ultralytics 
+ultralytics --only-binary=ultralytics
+
+# ONNX inference for YOLO 
+onnxruntime --only-binary=onnxruntime
+
+# ✅ Force HEADLESS OpenCV
+opencv-python-headless==4.10.0.84 --only-binary=opencv-python-headless
