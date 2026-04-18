@@ -56,8 +56,6 @@ CAM_CLASSES: Dict[str, type] = {
 
 # ---------------------------
 # Per-method colormap mapping
-#  - first 5 use Matplotlib: Reds, Blues, Greens, Oranges, Purples
-#  - last 5 use OpenCV colormaps
 # ---------------------------
 METHOD_TO_CMAP_KIND: Dict[str, Tuple[str, Union[str, int]]] = {
     "gradcam": ("mpl", "Reds"),
@@ -74,8 +72,7 @@ METHOD_TO_CMAP_KIND: Dict[str, Tuple[str, Union[str, int]]] = {
 
 
 # ---------------------------
-# Target layer discovery:
-# prefer model.cam_target if set; else last Conv2d in backbone; else last Conv2d anywhere
+# Target layer discovery
 # ---------------------------
 def _find_last_conv(module: nn.Module) -> Optional[nn.Conv2d]:
     last: Optional[nn.Conv2d] = None
@@ -99,12 +96,9 @@ def discover_target_layer(model: nn.Module) -> nn.Module:
 
 
 # ---------------------------
-# CAM post-processing (lateral project)
+# CAM post-processing
 # ---------------------------
 def normalize_cam_to_unit(cam_map: np.ndarray) -> np.ndarray:
-    """
-    Normalize arbitrary CAM activations to float32 in [0,1].
-    """
     cam_map = cam_map.astype(np.float32, copy=False)
     mmin, mmax = float(np.min(cam_map)), float(np.max(cam_map))
     if mmax <= mmin:
@@ -113,16 +107,6 @@ def normalize_cam_to_unit(cam_map: np.ndarray) -> np.ndarray:
 
 
 def threshold_cam_once(cam01: np.ndarray, thr: float, preserve_intensity: bool = True) -> np.ndarray:
-    """
-    Apply a SINGLE threshold ONCE to a normalized CAM map in [0,1].
-
-    Args:
-        cam01: float32 CAM in [0,1]
-        thr: threshold in [0,1]
-        preserve_intensity:
-            - True: keep original intensities above threshold, zero-out below.
-            - False: return a hard binary mask (0/1).
-    """
     thr = float(thr)
     gate = (cam01 >= thr).astype(np.float32)
     if preserve_intensity:
@@ -131,28 +115,23 @@ def threshold_cam_once(cam01: np.ndarray, thr: float, preserve_intensity: bool =
 
 
 # ---------------------------
-# Main CAM: returns a [0,1] float mask at input spatial size
-#  Lateral updates:
-#   - default method = EigenCAM
-#   - EigenCAM is computed target-free
-#   - normalized CAM is thresholded ONCE (default thr=0.7)
+# Main CAM computation
 # ---------------------------
 @torch.enable_grad()
 def compute_cam_mask(
     model: nn.Module,
     input_tensor: torch.Tensor,          # (1,3,H,W) on correct device
     class_index: int,
-    method: str = DEFAULT_CAM_METHOD,    # ✅ lateral default
+    method: str = DEFAULT_CAM_METHOD,
     aug_smooth: bool = True,
     eigen_smooth: bool = True,
-    threshold_cam: Optional[float] = DEFAULT_THRESHOLD_CAM,  # ✅ apply ONCE
+    threshold_cam: Optional[float] = DEFAULT_THRESHOLD_CAM,
     preserve_intensity: bool = True,
 ) -> np.ndarray:
     if input_tensor.ndim != 4 or input_tensor.size(0) != 1:
         raise ValueError("input_tensor must be (1, C, H, W)")
 
     model.eval()
-    # For gradient-based CAMs we need grads enabled.
     for p in model.parameters():
         p.requires_grad_(True)
 
@@ -168,8 +147,8 @@ def compute_cam_mask(
 
     # ---- Compute raw CAM ----
     if mname == "eigencam":
-        # EigenCAM: target-free (matches your lateral pipeline)
-        cam_raw = cam(input_tensor=input_tensor.float())[0]  # HxW
+        # EigenCAM is target-free; pass targets=None explicitly (required in newer grad-cam versions)
+        cam_raw = cam(input_tensor=input_tensor.float(), targets=None)[0]  # HxW
     else:
         targets = [ClassifierOutputTarget(int(class_index))]
         cam_raw = cam(
@@ -184,11 +163,11 @@ def compute_cam_mask(
     # ---- Normalize to [0,1] ----
     cam01 = normalize_cam_to_unit(cam_raw)
 
-    # ---- SINGLE threshold applied ONCE (lateral project rule) ----
+    # ---- Single threshold applied once ----
     if threshold_cam is not None:
         cam01 = threshold_cam_once(cam01, thr=float(threshold_cam), preserve_intensity=preserve_intensity)
 
-    # release hooks
+    # Release hooks
     try:
         cam.activations_and_grads.release()
     except Exception:
@@ -199,7 +178,7 @@ def compute_cam_mask(
 
 
 # ---------------------------
-# Overlay: supports Matplotlib or OpenCV colormaps based on cmap_kind
+# Overlay heatmap on BGR image
 # ---------------------------
 def overlay_heatmap_on_bgr(
     base_bgr: np.ndarray,                # uint8 (H, W, 3) BGR
@@ -214,12 +193,10 @@ def overlay_heatmap_on_bgr(
     kind, spec = cmap_kind
     if kind == "mpl":
         if not _HAVE_MPL:
-            # Fallback to a stable OpenCV map if Matplotlib isn't available
             heat = cv2.applyColorMap(cam_u8, cv2.COLORMAP_JET)
         else:
-            # spec like "Reds", "Blues", ...
             m = cm.get_cmap(str(spec))
-            heat_rgb = (m(cam_u8 / 255.0)[..., :3] * 255.0).astype(np.uint8)  # HxWx3 RGB
+            heat_rgb = (m(cam_u8 / 255.0)[..., :3] * 255.0).astype(np.uint8)
             heat = cv2.cvtColor(heat_rgb, cv2.COLOR_RGB2BGR)
     else:
         heat = cv2.applyColorMap(cam_u8, int(spec))
