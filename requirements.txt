@@ -1,45 +1,28 @@
 # ── App runtime ────────────────────────────────────────────────────────────────
 streamlit>=1.36,<1.49
-numpy --only-binary=numpy
-pillow>=10.2 --only-binary=pillow
+numpy
+pillow>=10.2
 
 # ── Hugging Face ────────────────────────────────────────────────────────────────
 huggingface_hub>=0.23,<0.35
-safetensors>=0.4.3 --only-binary=safetensors
+safetensors>=0.4.3
 
-# ── Torch stack (CPU wheels on Streamlit Cloud) ─────────────────────────────────
-torch --only-binary=torch
-torchvision --only-binary=torchvision
-timm --only-binary=timm
-pytorch-lightning --only-binary=pytorch-lightning
-torchmetrics --only-binary=torchmetrics
-
-# ── OpenCV — HEADLESS MUST come BEFORE ultralytics ──────────────────────────────
-# Install headless first so pip's resolver sees it as already-satisfied
-# when Ultralytics requests opencv-python.
-opencv-python-headless==4.10.0.84 --only-binary=opencv-python-headless
-
-# Explicitly block the full opencv-python to prevent Ultralytics overriding us
-# (pip will use the already-installed headless wheel to satisfy cv2 imports)
-opencv-python==4.10.0.84 --only-binary=opencv-python ; sys_platform == "never"
-
-# ── Ultralytics (YOLO) ──────────────────────────────────────────────────────────
-# Use no-deps so ultralytics does NOT pull in opencv-python (full build)
-ultralytics --only-binary=ultralytics --no-deps
-
-# Re-add ultralytics' real runtime deps (excluding opencv, which we supply headless)
-scipy --only-binary=scipy
-pandas --only-binary=pandas
-psutil
-py-cpuinfo
-requests
-tqdm
-matplotlib --only-binary=matplotlib
-PyYAML
-seaborn --only-binary=seaborn
+# ── Torch stack ─────────────────────────────────────────────────────────────────
+torch
+torchvision
+timm
+pytorch-lightning
+torchmetrics
 
 # ── ONNX ────────────────────────────────────────────────────────────────────────
-onnxruntime --only-binary=onnxruntime
+onnxruntime
+
+# ── Ultralytics (YOLO) ──────────────────────────────────────────────────────────
+ultralytics
 
 # ── Grad-CAM ────────────────────────────────────────────────────────────────────
 grad-cam @ git+https://github.com/jacobgil/pytorch-grad-cam
+
+# ── OpenCV HEADLESS — must be LAST so it overwrites any full opencv-python ──────
+# ultralytics pulls in opencv-python (full); reinstalling headless last wins.
+opencv-python-headless==4.10.0.84
