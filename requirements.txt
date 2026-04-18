@@ -24,4 +24,4 @@ onnxruntime --only-binary=onnxruntime
 
 # ✅ Force HEADLESS OpenCV
 # opencv-python-headless==4.10.0.84 --only-binary=opencv-python-headless
-opencv-python-headless==4.7.0.72
+opencv-python-headless==4.7.0.72 --only-binary=opencv-python-headless
