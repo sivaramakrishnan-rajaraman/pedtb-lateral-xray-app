@@ -1,0 +1,36 @@
+# ---- Global pip options (Streamlit Cloud respects these in requirements.txt) ----
+# Removed the global --no-binary=:all: and --only-binary=... lines
+# because they were causing the error. Instead, we're using --only-binary
+# on a package-by-package basis.
+
+# ---- App runtime ----
+streamlit>=1.36,<1.49
+numpy --only-binary=numpy
+pillow>=10.2 --only-binary=pillow
+
+# Hugging Face hub + safetensors
+huggingface_hub>=0.23,<0.35 --only-binary=huggingface_hub
+safetensors>=0.4.3 --only-binary=safetensors
+
+# Torch stack (CPU wheels on Streamlit Cloud)
+# Changed torch, torchvision, and timm to a more recent, compatible version
+torch --only-binary=torch
+torchvision --only-binary=torchvision
+timm --only-binary=timm
+# Updated PyTorch Lightning to a compatible version (PyTorch 2.5 is compatible with recent versions)
+pytorch-lightning --only-binary=pytorch-lightning
+
+# PyTorch Grad-CAM (pull from git to avoid any packaging quirks)
+# NOTE: This package *imports* cv2 but does NOT hard-require opencv-python;
+# our headless build above satisfies it.
+grad-cam @ git+https://github.com/jacobgil/pytorch-grad-cam
+
+# Ultralytics (added)
+# Use a specific version or range if needed.
+ultralytics --only-binary=ultralytics
+
+# ONNX inference for YOLO (no OpenCV dependency)
+onnxruntime --only-binary=onnxruntime
+
+# ✅ Force HEADLESS OpenCV (prevents libGL)
+opencv-python-headless==4.10.0.84 --only-binary=opencv-python-headless
