@@ -1,0 +1,29 @@
+# ── App runtime ────────────────────────────────────────────────────────────────
+streamlit>=1.36,<1.49
+numpy
+pillow>=10.2
+
+# ── Hugging Face ────────────────────────────────────────────────────────────────
+huggingface_hub>=0.23,<0.35
+safetensors>=0.4.3
+
+# ── Torch stack ─────────────────────────────────────────────────────────────────
+torch
+torchvision
+timm
+pytorch-lightning
+torchmetrics
+
+# ── ONNX ────────────────────────────────────────────────────────────────────────
+onnxruntime
+
+# ── OpenCV HEADLESS — installed BEFORE ultralytics so the resolver sees it ──────
+# Pinned headless build; ultralytics will see cv2 already satisfied and skip
+# pulling opencv-python (full).
+opencv-python-headless==4.10.0.84
+
+# ── Ultralytics (YOLO) — pinned to avoid unpredictable transitive deps ──────────
+ultralytics==8.3.0
+
+# ── Grad-CAM ────────────────────────────────────────────────────────────────────
+grad-cam @ git+https://github.com/jacobgil/pytorch-grad-cam
