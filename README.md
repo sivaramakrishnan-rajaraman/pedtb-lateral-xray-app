@@ -2,9 +2,6 @@
 
 ## 🌐 Live App
 
-Public URL: https://pedtb-lateral-xray-app.streamlit.app/
-
-
 **Live app:**  
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pedtb-lateral-xray-application.streamlit.app/)
 
