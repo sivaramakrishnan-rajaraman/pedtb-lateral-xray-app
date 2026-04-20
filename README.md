@@ -6,7 +6,7 @@ Public URL: https://pedtb-lateral-xray-app.streamlit.app/
 
 
 **Live app:**  
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pedtb-lateral-xray-appn.streamlit.app/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://pedtb-lateral-xray-application.streamlit.app/)
 
 This app demonstrates an end-to-end, explainable pipeline on **pediatric lateral chest X-ray classification**:
 
